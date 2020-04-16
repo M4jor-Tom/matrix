@@ -1,0 +1,1 @@
+link* readFile(char* path);
