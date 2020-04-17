@@ -12,6 +12,7 @@ link* newLink(char* errorMessage)
 	link* ret = (link*)safeMalloc(sizeof(link), errorMessage);
 	strcpy(ret -> word, "\0");
 	ret -> letter = '\0';
+	ret -> letterCount = 0;
 	ret -> nextLinkPtr = NULL;
 	return ret;
 }
@@ -50,52 +51,101 @@ link* insertLink(link* headLinkPtr, link* toInsertLinkPtr)
 	}
 }
 
-link* updateLetterChain(link* chainHeadPtr, char letter_, int* countPtr)
+link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat)
 {
-	if(chainHeadPtr == NULL)
+	if(lettersChainHeadPtr == NULL)
 	{
 		//Liste nulle: On retourne une liste à un maillon avec la stat
-		link* ret = newLink("updateLetterChain/chainHeadPtr == NULL");
-		ret -> letter = letter_;
-		(*countPtr)++;
-		return ret;
+		link* newLetterLinkPtr = newLink("updateLetterChain/lettersChainHeadPtr == NULL");
+		newLetterLinkPtr -> letter = letter_;
+		newLetterLinkPtr -> letterCount = 1;
+		
+		//char* tempLabel = safeAlloc(tempLabel, sizeof(char) * (mat -> size), "updateLetterChain/lettersChainHeadPtr");
+		//strcpy(tempLabel, mat -> label);
+		
+		mat -> size++;
+		//mat -> label = safeAlloc(mat -> label, sizeof(char) * (mat -> size), "updateLetterChain/lettersChainHeadPtr");
+		
+		//printf("%d\n", mat -> size);
+		return newLetterLinkPtr;
 	}
-	else if(chainHeadPtr -> letter != letter_)
+	else if(lettersChainHeadPtr -> letter != letter_)
 	{
 		//Liste pas nulle, mais lettre non correspondante: On relance la fonction avec le maillon d'après
-		chainHeadPtr -> nextLinkPtr = updateLetterChain(chainHeadPtr -> nextLinkPtr, letter_, countPtr);
+		lettersChainHeadPtr -> nextLinkPtr = updateLetterChain(lettersChainHeadPtr -> nextLinkPtr, letter_, mat);
 		
-		if(chainHeadPtr -> nextLinkPtr == NULL)
+		if(lettersChainHeadPtr -> nextLinkPtr == NULL)
 		{
 			//Fin de chaîne de stats: la lettre n'a pas été trouvée
 			//On crée une nouvelle stat de lettre
-			chainHeadPtr -> nextLinkPtr = newLink("updateLetterChain/else/while");
+			lettersChainHeadPtr -> nextLinkPtr = newLink("updateLetterChain/else/while");
 			
 			//On lui donne la valeur clé (la lettre)
-			chainHeadPtr = chainHeadPtr -> nextLinkPtr;
-			chainHeadPtr -> letter = letter_;
-			(*countPtr)++;
+			lettersChainHeadPtr = lettersChainHeadPtr -> nextLinkPtr;
+			lettersChainHeadPtr -> letter = letter_;
+			lettersChainHeadPtr -> letterCount = 1;
+			mat -> size++;
 		}
 	}
+	else 
+		//Lettre existante, incrément du compteur
+		lettersChainHeadPtr -> letterCount++;
 	
-	return chainHeadPtr;
+	return lettersChainHeadPtr;
 }
 
-link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, int* countPtr)
+char* linkPtrToLettersArray(link* linkPtr, int* count)
+{
+	if(linkPtr != NULL)
+	{
+		int size = sizeof(char);
+		char* recipient = safeMalloc(size, "linkPtrToLettersArray/Init");
+		*count = 0;
+		do
+		{
+			recipient[(*count)++] = linkPtr -> letter;
+			
+			//Maillon suivant
+			if(linkPtr -> nextLinkPtr != NULL)
+			{
+				size = size + sizeof(char);
+				recipient = safeRealloc(recipient, size, "linkPtrToLettersArray/Init");
+			}
+			linkPtr = linkPtr -> nextLinkPtr;
+		}while(linkPtr != NULL);
+		return recipient;
+	}
+	else return NULL;
+}
+
+link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat)
 {
 	int i = 0;
 	
 	if(wordChainPtr != NULL)
-		//Chaîne contenant les mots pas nule
+	{
+		//Chaîne contenant les mots pas nulle
+		char previousChar = '\0';
+		link* previousLetterPtr = NULL;
 		for(i = 0; i < strlen(wordChainPtr -> word); i++)
-		{
-			//Pour chaque lettre du mot
-			lettersChainHeadPtr = updateLetterChain(lettersChainHeadPtr, wordChainPtr -> word[i], countPtr);
-		}
+			if(wordChainPtr -> word[i] != ' ' && wordChainPtr -> word[i] != '\n')
+			{
+				//Pour chaque lettre du mot (sauf espace et entrer)
+				lettersChainHeadPtr = updateLetterChain(lettersChainHeadPtr, wordChainPtr -> word[i], mat);
+				if(previousChar != '\0' && previousLetterPtr != NULL)
+				{
+					previousLetterPtr -> followingLetters;
+				}
+				
+				//Fin de processus, préparation du cycle suivant
+				previousChar = wordChainPtr -> word[i];
+				previousLetterPtr = lettersChainHeadPtr;
+			}
+	}
 		
 	if(wordChainPtr -> nextLinkPtr != NULL)
 		//Récursion avec le mot suivant
-		return getLetters(wordChainPtr -> nextLinkPtr, lettersChainHeadPtr, countPtr);
+		return getLetters(wordChainPtr -> nextLinkPtr, lettersChainHeadPtr, mat);
 		
 	else return lettersChainHeadPtr;
 }
@@ -106,17 +156,37 @@ matress getProbasMatressFromWordsChain(link* wordChainHeadPtr)
 	if(wordChainHeadPtr == NULL) printf("<getProbasMatressFromWordsChain> Error: wordChainHeadPtr == NULL\n");
 	else
 	{
+		//Initialiser la matrice nulle
 		matress mat;
 		mat.size = 0;
-		int count;
-		link* lettersList = getLetters(wordChainHeadPtr, NULL, &mat.size);
+		mat.label = NULL;
+		mat.m = NULL;
+		
+		//Créer la liste de lettres
+		link *lettersListHeadPtr = getLetters(wordChainHeadPtr, NULL, &mat);
+		
+		//Visualiser la liste de lettres
+		//displayChain(lettersListHeadPtr, LETTERS);
 		float *arrayHeadPtr = safeMalloc(sizeof(float*) * mat.size, "getProbasMatressFromWordsChain/else");
 		
-		for(count = 0; count < mat.size; count++)
+				
+		//Créer un array à partir de la liste
+		int lettersCount;
+		mat.label = linkPtrToLettersArray(lettersListHeadPtr, &lettersCount);
+		
+		int i = 0;
+		for(i = 0; i < mat.size; i++)
 		{
 			//Pour chaque lettre différente
-			arrayHeadPtr[count] = safeMalloc(sizeof(float) * mat.size, "getProbasMatressFromWordsChain/else/for");
-			//*arrayHeadPtr[count] = ...
+			printf("|\t%c|", mat.label[i]);
+			arrayHeadPtr[i] = safeMalloc(sizeof(float) * mat.size, "getProbasMatressFromWordsChain/else/for");
+			int j = 0;
+			for(j = 0; j < mat.size; j++)
+			{
+				printf("|\t%c|", mat.label[j]);
+			}
+			printf("\n");
+			//*arrayHeadPtr[i] = ...
 		}
 		
 		printf("\nMatress size: %d\n", mat.size);
@@ -134,11 +204,7 @@ void displayLink(link* linkPtr, int type)
 		}
 		else if(type == LETTERS)
 		{
-			if(linkPtr -> letter == '\n')
-				printf("Enter;");
-			else if(linkPtr -> letter == ' ')
-				printf("Space;");
-			else printf("%c;", linkPtr -> letter);
+			printf("%c;", linkPtr -> letter);
 		}
 	}
 	
@@ -151,11 +217,8 @@ void displayChain(link* chainListPtr, int type)
 	else 
 	{
 		displayLink(chainListPtr, type);
-		while(chainListPtr -> nextLinkPtr != NULL)
-		{
-			chainListPtr = chainListPtr -> nextLinkPtr;
-			displayLink(chainListPtr, type);
-		}
+		if(chainListPtr -> nextLinkPtr != NULL)
+			displayChain(chainListPtr -> nextLinkPtr, type);
 	}
 	printf("\n");
 }

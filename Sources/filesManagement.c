@@ -40,5 +40,9 @@ link* readFile(char* path)
 			
 		}
 	}
+	
+	if(recipientHeadListPtr == NULL) 
+		printf("<readFile> Warning: NULL return\n");
+	
 	return recipientHeadListPtr;
 }

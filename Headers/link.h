@@ -4,6 +4,10 @@ typedef struct link
 {
 	char word[WORD_SIZE];
 	char letter;
+	int letterCount;
+	
+	char* followingLetters;
+	int followingLettersCount;
 	
 	struct link* nextLinkPtr;
 }link;
@@ -25,19 +29,21 @@ link* lastLink(link* currentLinkPtr);
 link* insertLink(link* headLinkPtr, link* toInsertLinkPtr);
 
 //Updates the letters stat chain with a new value
-link* updateLetterChain(link* chainHeadPtr, char letter, int* countPtr);
+link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat);
+
+char* linkPtrToLettersArray(link* linkPtr, int* count);
 
 //Outputs a matress from a wordChain pointor
-matress getProbasMatressFromWordsChain(link* wordChainHeadPtr);
+matress getProbasMatressFromWordsChain(link* wordlettersChainHeadPtr);
 
 //Plots an inputed matress of probas
 void plotProbasMatress(matress* probas);
 
 //Counts letters in a chain of link words
-link* getLetters(link *wordChainPtr, link *lettersCountChainHeadPtr, int *count);
+link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat);
 
 //Displays a link
 void displayLink(link* linkPtr, int type);
 
 //Displays a chain, with a given type of display (WORD or LETTERS_COUNT)
-void displayChain(link* chainHeadPtr, int type);
+void displayChain(link* lettersChainHeadPtr, int type);

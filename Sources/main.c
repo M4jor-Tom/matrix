@@ -10,15 +10,13 @@
 
 int main()
 {
-	int count = 0;
-	
 	//Affichage des mots dans le .txt
 	link *wordChainPtr = readFile(FILE_NAME);
 	displayChain(wordChainPtr, WORD);
 	
 	//Affichage des différentes lettres dans le .txt
-	link *lettersChainPtr = getLetters(wordChainPtr, NULL, &count);
-	displayChain(lettersChainPtr, LETTERS);
+	//link *lettersChainPtr = getLetters(wordChainPtr, NULL, &count);
+	//displayChain(lettersChainPtr, LETTERS);
 	
 	
 	getProbasMatressFromWordsChain(wordChainPtr);
