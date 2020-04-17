@@ -119,32 +119,16 @@ link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat)
 	{
 		//Chaîne contenant les mots pas nulle
 		int i = 0;
-		link* previousLetterPtr = NULL;
-		int size = sizeof(char);
 		for(i = 0; i < strlen(wordChainPtr -> word); i++)
 			if(wordChainPtr -> word[i] != ' ' && wordChainPtr -> word[i] != '\n')
 			{
 				//Pour chaque lettre du mot (sauf espace et entrer)
 				lettersChainHeadPtr = updateLetterChain(lettersChainHeadPtr, wordChainPtr -> word[i], mat);
-				if(previousLetterPtr != NULL)
+				if(strlen(wordChainPtr -> word) > i)
 				{
-					//Arriver en fin de liste des caractères suivant ce caractère
-					while(previousLetterPtr -> nextFollowingLetterPtr != NULL)
-						previousLetterPtr = previousLetterPtr -> nextFollowingLetterPtr;
-						
-					//On rajoute une structure pour la lettre qui arrive
-					previousLetterPtr -> nextFollowingLetterPtr = newLink("getLetters/previousLetterPtr -> nextFollowingLetterPtr");
-					
-					//On la complète avec la lettre courante
-					//Pour le caractère précédent, on ajoute le caractère courant à sa liste interne
-					previousLetterPtr -> nextFollowingLetterPtr -> letter = wordChainPtr -> word[i];
-					
-					//Visualiser ce que comprend le programme en termes d'enchainement des lettres
-					printf("%c then %c\n", previousLetterPtr -> letter, previousLetterPtr -> nextFollowingLetterPtr -> letter);
+					//Pas le dernier cycle
+					//mat -> m[]
 				}
-				
-				//Fin de processus, préparation du cycle suivant
-				previousLetterPtr = lettersChainHeadPtr;
 			}
 	}
 		
@@ -183,6 +167,24 @@ matress getProbasMatressFromWordsChain(link* wordChainHeadPtr)
 	}
 }
 
+matress newMatress(int size, char *label, float pad)
+{
+	matress *matressPtr;
+	matressPtr -> size = size;
+	matressPtr -> label = label;
+	for(i = 0; i < matressPtr -> size; i++)
+	{
+		//Pour chaque lettre différente
+		matressPtr -> m[i] = safeMalloc(sizeof(float) * matressPtr -> size, "getProbasMatressFromWordsChain/else/for");
+		int j = 0;
+		for(j = 0; j < matressPtr -> size; j++)
+		{
+			matressPtr -> m[i][j] = pad;
+		}
+	}
+	return matressPtr;
+}
+
 void plotMatress(matress mat)
 {
 	int i = 0;
@@ -202,7 +204,7 @@ void plotMatress(matress mat)
 		for(j = 0; j < mat.size; j++)
 		{
 			mat.m[i][j] = 0.0;
-			printf("|P%c-%c:%.2f|", mat.label[i], mat.label[j]);
+			printf("|P%c-%c:%.2f|", mat.label[i], mat.label[j], mat.m[i][j]);
 		}
 		printf("\n");
 	}
@@ -221,11 +223,6 @@ void displayLink(link* linkPtr, int type)
 		else if(type == LETTERS)
 		{
 			printf("%c;\n", linkPtr -> letter);
-			while(linkPtr -> nextFollowingLetterPtr != NULL)
-			{
-				linkPtr = linkPtr -> nextFollowingLetterPtr;
-				printf("-%c;\n", linkPtr -> letter);
-			}
 		}
 	}
 	

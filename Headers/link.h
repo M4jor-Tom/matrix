@@ -32,6 +32,8 @@ link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat);
 
 char* linkPtrToLettersArray(link* linkPtr, int* count);
 
+matress newMatress(int size, char *label, float pad);
+
 //Outputs a matress from a wordChain pointor
 matress getProbasMatressFromWordsChain(link* wordlettersChainHeadPtr);
 

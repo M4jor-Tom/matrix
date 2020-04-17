@@ -38,3 +38,14 @@ int safeAlloc(int ptr, int sizeof_, char* errorMessage)
 		return safeRealloc(ptr, sizeof_, errorMessage);
 	}
 }
+
+int array_search(char needle, int *haystack, int length)
+{
+	int i;
+	for(i = 0; i < length; i++)
+	{
+		if(haystack[i] == needle)
+			return i;
+	}
+	return - 1;
+}
