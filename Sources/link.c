@@ -60,11 +60,7 @@ link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat)
 		newLetterLinkPtr -> letter = letter_;
 		newLetterLinkPtr -> letterCount = 1;
 		
-		//char* tempLabel = safeAlloc(tempLabel, sizeof(char) * (mat -> size), "updateLetterChain/lettersChainHeadPtr");
-		//strcpy(tempLabel, mat -> label);
-		
 		mat -> size++;
-		//mat -> label = safeAlloc(mat -> label, sizeof(char) * (mat -> size), "updateLetterChain/lettersChainHeadPtr");
 		
 		//printf("%d\n", mat -> size);
 		return newLetterLinkPtr;
@@ -79,7 +75,6 @@ link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat)
 			//Fin de chaîne de stats: la lettre n'a pas été trouvée
 			//On crée une nouvelle stat de lettre
 			lettersChainHeadPtr -> nextLinkPtr = newLink("updateLetterChain/else/while");
-			
 			//On lui donne la valeur clé (la lettre)
 			lettersChainHeadPtr = lettersChainHeadPtr -> nextLinkPtr;
 			lettersChainHeadPtr -> letter = letter_;
@@ -120,25 +115,35 @@ char* linkPtrToLettersArray(link* linkPtr, int* count)
 
 link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat)
 {
-	int i = 0;
-	
 	if(wordChainPtr != NULL)
 	{
 		//Chaîne contenant les mots pas nulle
-		char previousChar = '\0';
+		int i = 0;
 		link* previousLetterPtr = NULL;
+		int size = sizeof(char);
 		for(i = 0; i < strlen(wordChainPtr -> word); i++)
 			if(wordChainPtr -> word[i] != ' ' && wordChainPtr -> word[i] != '\n')
 			{
 				//Pour chaque lettre du mot (sauf espace et entrer)
 				lettersChainHeadPtr = updateLetterChain(lettersChainHeadPtr, wordChainPtr -> word[i], mat);
-				if(previousChar != '\0' && previousLetterPtr != NULL)
+				if(previousLetterPtr != NULL)
 				{
-					previousLetterPtr -> followingLetters;
+					//Arriver en fin de liste des caractères suivant ce caractère
+					while(previousLetterPtr -> nextFollowingLetterPtr != NULL)
+						previousLetterPtr = previousLetterPtr -> nextFollowingLetterPtr;
+						
+					//On rajoute une structure pour la lettre qui arrive
+					previousLetterPtr -> nextFollowingLetterPtr = newLink("getLetters/previousLetterPtr -> nextFollowingLetterPtr");
+					
+					//On la complète avec la lettre courante
+					//Pour le caractère précédent, on ajoute le caractère courant à sa liste interne
+					previousLetterPtr -> nextFollowingLetterPtr -> letter = wordChainPtr -> word[i];
+					
+					//Visualiser ce que comprend le programme en termes d'enchainement des lettres
+					printf("%c then %c\n", previousLetterPtr -> letter, previousLetterPtr -> nextFollowingLetterPtr -> letter);
 				}
 				
 				//Fin de processus, préparation du cycle suivant
-				previousChar = wordChainPtr -> word[i];
 				previousLetterPtr = lettersChainHeadPtr;
 			}
 	}
@@ -166,33 +171,44 @@ matress getProbasMatressFromWordsChain(link* wordChainHeadPtr)
 		link *lettersListHeadPtr = getLetters(wordChainHeadPtr, NULL, &mat);
 		
 		//Visualiser la liste de lettres
-		//displayChain(lettersListHeadPtr, LETTERS);
-		float *arrayHeadPtr = safeMalloc(sizeof(float*) * mat.size, "getProbasMatressFromWordsChain/else");
+		displayChain(lettersListHeadPtr, LETTERS);
+		mat.m = safeMalloc(sizeof(float*) * mat.size, "getProbasMatressFromWordsChain/else");
 		
 				
 		//Créer un array à partir de la liste
 		int lettersCount;
 		mat.label = linkPtrToLettersArray(lettersListHeadPtr, &lettersCount);
 		
-		int i = 0;
-		for(i = 0; i < mat.size; i++)
-		{
-			//Pour chaque lettre différente
-			printf("|\t%c|", mat.label[i]);
-			arrayHeadPtr[i] = safeMalloc(sizeof(float) * mat.size, "getProbasMatressFromWordsChain/else/for");
-			int j = 0;
-			for(j = 0; j < mat.size; j++)
-			{
-				printf("|\t%c|", mat.label[j]);
-			}
-			printf("\n");
-			//*arrayHeadPtr[i] = ...
-		}
-		
-		printf("\nMatress size: %d\n", mat.size);
+		plotMatress(mat);
 	}
 }
 
+void plotMatress(matress mat)
+{
+	int i = 0;
+	printf("|X|");
+	for(i = 0; i < mat.size; i++)
+	{
+		//Pour chaque lettre différente
+		printf("|%c        |", mat.label[i]);
+	}
+	printf("\n");
+	for(i = 0; i < mat.size; i++)
+	{
+		//Pour chaque lettre différente
+		printf("|%c|", mat.label[i]);
+		mat.m[i] = safeMalloc(sizeof(float) * mat.size, "getProbasMatressFromWordsChain/else/for");
+		int j = 0;
+		for(j = 0; j < mat.size; j++)
+		{
+			mat.m[i][j] = 0.0;
+			printf("|P%c-%c:%.2f|", mat.label[i], mat.label[j]);
+		}
+		printf("\n");
+	}
+	
+	printf("\nMatress size: %d\n", mat.size);
+}
 
 void displayLink(link* linkPtr, int type)
 {
@@ -204,7 +220,12 @@ void displayLink(link* linkPtr, int type)
 		}
 		else if(type == LETTERS)
 		{
-			printf("%c;", linkPtr -> letter);
+			printf("%c;\n", linkPtr -> letter);
+			while(linkPtr -> nextFollowingLetterPtr != NULL)
+			{
+				linkPtr = linkPtr -> nextFollowingLetterPtr;
+				printf("-%c;\n", linkPtr -> letter);
+			}
 		}
 	}
 	

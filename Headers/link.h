@@ -6,8 +6,7 @@ typedef struct link
 	char letter;
 	int letterCount;
 	
-	char* followingLetters;
-	int followingLettersCount;
+	struct link* nextFollowingLetterPtr;
 	
 	struct link* nextLinkPtr;
 }link;
@@ -37,7 +36,7 @@ char* linkPtrToLettersArray(link* linkPtr, int* count);
 matress getProbasMatressFromWordsChain(link* wordlettersChainHeadPtr);
 
 //Plots an inputed matress of probas
-void plotProbasMatress(matress* probas);
+void plotMatress(matress mat);
 
 //Counts letters in a chain of link words
 link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat);
