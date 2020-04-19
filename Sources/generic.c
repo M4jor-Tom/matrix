@@ -39,13 +39,30 @@ int safeAlloc(int ptr, int sizeof_, char* errorMessage)
 	}
 }
 
-int array_search(char needle, int *haystack, int length)
+int array_search(char needle, char *haystack, int length)
 {
 	int i;
 	for(i = 0; i < length; i++)
 	{
+		//printf("needle: %c // haystack[%d] = %c\n", needle, i, haystack[i]);
 		if(haystack[i] == needle)
 			return i;
 	}
 	return - 1;
+}
+
+char toLower(char char_)
+{
+	return char_ >= 'A' && char_ <= 'Z'
+			? char_ + 'a' - 'A'
+			: char_;
+}
+
+void strToLower(char* str)
+{
+	int i;
+	for(i = 0; i < strlen(str); i++)
+	{
+		str[i] = toLower(str[i]);
+	}
 }

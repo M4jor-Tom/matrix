@@ -22,14 +22,12 @@ link* readFile(char* path)
 	{
 		//Création du premier chaînon
 		recipientHeadListPtr = newLink("readFile/elseif");
-		recipientHeadListPtr -> nextLinkPtr = NULL;
 		strcpy(recipientHeadListPtr -> word, newWord);
 		
 		while(fgets(newWord, WORD_SIZE, filePtr))
 		{
-			//Création du prochain chaînon
+			//Création des prochains chaînons
 			link * newLinkPtr = newLink("readFile/while");
-			newLinkPtr -> nextLinkPtr = NULL;
 			strcpy(newLinkPtr -> word, newWord);
 			
 			recipientHeadListPtr = 

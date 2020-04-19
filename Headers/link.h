@@ -28,7 +28,7 @@ link* lastLink(link* currentLinkPtr);
 link* insertLink(link* headLinkPtr, link* toInsertLinkPtr);
 
 //Updates the letters stat chain with a new value
-link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat, int resize);
+link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat, int setSize);
 
 char* linkPtrToLettersArray(link* linkPtr, int* count);
 
@@ -37,11 +37,19 @@ void setMatressSize(matress* matPtr, link* wordChainHeadPtr);
 //Outputs a matress from a wordChain pointor
 matress getProbasMatressFromWordsChain(link* wordlettersChainHeadPtr);
 
+int list_search(link* lettersListPtr, char letter);
+
+//Manages every sum a matress' lines to be equal to 1.0
+void ponderateMatress(matress* mat);
+
+//Generates a word from a matress
+char* generateWord(matress* mat, int* length);
+
 //Plots an inputed matress of probas
 void plotMatress(matress mat);
 
 //Counts letters in a chain of link words
-link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat, int resize);
+link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat, int setSize, int setProba);
 
 //Displays a link
 void displayLink(link* linkPtr, int type);
