@@ -51,7 +51,7 @@ link* insertLink(link* headLinkPtr, link* toInsertLinkPtr)
 	}
 }
 
-link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat)
+link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat, int resize)
 {
 	if(lettersChainHeadPtr == NULL)
 	{
@@ -60,7 +60,7 @@ link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat)
 		newLetterLinkPtr -> letter = letter_;
 		newLetterLinkPtr -> letterCount = 1;
 		
-		mat -> size++;
+		if(resize) mat -> size++;
 		
 		//printf("%d\n", mat -> size);
 		return newLetterLinkPtr;
@@ -68,7 +68,7 @@ link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat)
 	else if(lettersChainHeadPtr -> letter != letter_)
 	{
 		//Liste pas nulle, mais lettre non correspondante: On relance la fonction avec le maillon d'après
-		lettersChainHeadPtr -> nextLinkPtr = updateLetterChain(lettersChainHeadPtr -> nextLinkPtr, letter_, mat);
+		lettersChainHeadPtr -> nextLinkPtr = updateLetterChain(lettersChainHeadPtr -> nextLinkPtr, letter_, mat, resize);
 		
 		if(lettersChainHeadPtr -> nextLinkPtr == NULL)
 		{
@@ -79,7 +79,7 @@ link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat)
 			lettersChainHeadPtr = lettersChainHeadPtr -> nextLinkPtr;
 			lettersChainHeadPtr -> letter = letter_;
 			lettersChainHeadPtr -> letterCount = 1;
-			mat -> size++;
+			if(resize) mat -> size++;
 		}
 	}
 	else 
@@ -113,7 +113,7 @@ char* linkPtrToLettersArray(link* linkPtr, int* count)
 	else return NULL;
 }
 
-link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat)
+link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat, int resize)
 {
 	if(wordChainPtr != NULL)
 	{
@@ -123,7 +123,7 @@ link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat)
 			if(wordChainPtr -> word[i] != ' ' && wordChainPtr -> word[i] != '\n')
 			{
 				//Pour chaque lettre du mot (sauf espace et entrer)
-				lettersChainHeadPtr = updateLetterChain(lettersChainHeadPtr, wordChainPtr -> word[i], mat);
+				lettersChainHeadPtr = updateLetterChain(lettersChainHeadPtr, wordChainPtr -> word[i], mat, resize);
 				if(strlen(wordChainPtr -> word) > i)
 				{
 					//Pas le dernier cycle
@@ -134,11 +134,19 @@ link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat)
 		
 	if(wordChainPtr -> nextLinkPtr != NULL)
 		//Récursion avec le mot suivant
-		return getLetters(wordChainPtr -> nextLinkPtr, lettersChainHeadPtr, mat);
+		return getLetters(wordChainPtr -> nextLinkPtr, lettersChainHeadPtr, mat, resize);
 		
 	else return lettersChainHeadPtr;
 }
 
+void setMatressSize(matress* matPtr, link* wordChainHeadPtr)
+{
+	link *lettersListHeadPtr = NULL;
+		
+	if(wordChainHeadPtr == NULL) 
+		printf("<setMatressSize> Error: wordChainHeadPtr == NULL\n");
+	else lettersListHeadPtr = getLetters(wordChainHeadPtr, lettersListHeadPtr, matPtr, 1);
+}
 
 matress getProbasMatressFromWordsChain(link* wordChainHeadPtr)
 {
@@ -151,12 +159,24 @@ matress getProbasMatressFromWordsChain(link* wordChainHeadPtr)
 		mat.label = NULL;
 		mat.m = NULL;
 		
+		setMatressSize(&mat, wordChainHeadPtr);
+		mat.m = safeMalloc(sizeof(float*) * mat.size, "getProbasMatressFromWordsChain/else");
+		int i;
+		for(i = 0; i < mat.size; i++)
+		{
+			mat.m[i] = safeMalloc(sizeof(float) * mat.size, "getProbasMatressFromWordsChain/else");
+			int j;
+			for(j = 0; j < mat.size; j++)
+				mat.m[i][j] = 0.0;
+		}
+		
+		printf("size: %d\n", mat.size);
+		
 		//Créer la liste de lettres
-		link *lettersListHeadPtr = getLetters(wordChainHeadPtr, NULL, &mat);
+		link *lettersListHeadPtr = getLetters(wordChainHeadPtr, NULL, &mat, 0);
 		
 		//Visualiser la liste de lettres
 		displayChain(lettersListHeadPtr, LETTERS);
-		mat.m = safeMalloc(sizeof(float*) * mat.size, "getProbasMatressFromWordsChain/else");
 		
 				
 		//Créer un array à partir de la liste
@@ -165,24 +185,6 @@ matress getProbasMatressFromWordsChain(link* wordChainHeadPtr)
 		
 		plotMatress(mat);
 	}
-}
-
-matress newMatress(int size, char *label, float pad)
-{
-	matress *matressPtr;
-	matressPtr -> size = size;
-	matressPtr -> label = label;
-	for(i = 0; i < matressPtr -> size; i++)
-	{
-		//Pour chaque lettre différente
-		matressPtr -> m[i] = safeMalloc(sizeof(float) * matressPtr -> size, "getProbasMatressFromWordsChain/else/for");
-		int j = 0;
-		for(j = 0; j < matressPtr -> size; j++)
-		{
-			matressPtr -> m[i][j] = pad;
-		}
-	}
-	return matressPtr;
 }
 
 void plotMatress(matress mat)
@@ -199,11 +201,9 @@ void plotMatress(matress mat)
 	{
 		//Pour chaque lettre différente
 		printf("|%c|", mat.label[i]);
-		mat.m[i] = safeMalloc(sizeof(float) * mat.size, "getProbasMatressFromWordsChain/else/for");
 		int j = 0;
 		for(j = 0; j < mat.size; j++)
 		{
-			mat.m[i][j] = 0.0;
 			printf("|P%c-%c:%.2f|", mat.label[i], mat.label[j], mat.m[i][j]);
 		}
 		printf("\n");

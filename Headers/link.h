@@ -28,11 +28,11 @@ link* lastLink(link* currentLinkPtr);
 link* insertLink(link* headLinkPtr, link* toInsertLinkPtr);
 
 //Updates the letters stat chain with a new value
-link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat);
+link* updateLetterChain(link* lettersChainHeadPtr, char letter_, matress* mat, int resize);
 
 char* linkPtrToLettersArray(link* linkPtr, int* count);
 
-matress newMatress(int size, char *label, float pad);
+void setMatressSize(matress* matPtr, link* wordChainHeadPtr);
 
 //Outputs a matress from a wordChain pointor
 matress getProbasMatressFromWordsChain(link* wordlettersChainHeadPtr);
@@ -41,7 +41,7 @@ matress getProbasMatressFromWordsChain(link* wordlettersChainHeadPtr);
 void plotMatress(matress mat);
 
 //Counts letters in a chain of link words
-link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat);
+link* getLetters(link *wordChainPtr, link *lettersChainHeadPtr, matress* mat, int resize);
 
 //Displays a link
 void displayLink(link* linkPtr, int type);

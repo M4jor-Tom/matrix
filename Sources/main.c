@@ -21,8 +21,5 @@ int main()
 	
 	getProbasMatressFromWordsChain(wordChainPtr);
 	
-	//Fin du programme
-	printf("\n\n");
-	system("pause");
 	return 0;
 }
